@@ -1,0 +1,4 @@
+syntax: glob
+mitm.js
+*.wasm.o
+trust-me.pem

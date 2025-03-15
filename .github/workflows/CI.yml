@@ -1,0 +1,68 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  build:
+    name: Build
+    timeout-minutes: 30
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get -y update
+        DEBIAN_FRONTEND=noninteractive sudo apt install -y nodejs
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Setup WASM
+      run: |
+        # setup emscripten
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install 4.0.1
+        ./emsdk activate 4.0.1
+    - name: Build Host (For Generated Files)
+      run: |
+        make -C mbedtls
+    - name: Build WASM
+      run: |
+        make -C mbedtls
+        source ./emsdk/emsdk_env.sh
+        make
+    - name: Upload JS files
+      uses: actions/upload-artifact@v4
+      if: github.event_name == 'push'
+      with:
+        name: wasm
+        path: mitm.js
+        retention-days: 90
+        overwrite: true
+    - name: Nuke previous release
+      uses: dev-drprasad/delete-tag-and-release@v1.0.1
+      with:
+        delete_release: true
+        tag_name: latest
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create release
+      uses: ncipollo/release-action@v1
+      with:
+        name: Latest build
+        tag: latest
+        commit: main
+        body: Latest Build
+        artifacts: mitm.js
+        prerelease: true
