@@ -45,7 +45,6 @@ jobs:
         make
     - name: Upload JS files
       uses: actions/upload-artifact@v4
-      if: github.event_name == 'push'
       with:
         name: wasm
         path: mitm.mjs
