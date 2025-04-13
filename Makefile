@@ -11,7 +11,7 @@ HEADERS = $(wildcard include/*.cpp)
 OBJS = $(patsubst %.cpp, %.wasm.o, $(SRC))
 
 LDFLAGS += -sALLOW_MEMORY_GROWTH=1 -sEMBIND_AOT=1 -sFILESYSTEM=0 \
-		   -sMODULARIZE=1 -sSINGLE_FILE=1 -sEXPORT_NAME=mitmjs
+		-sMODULARIZE=1 -sSINGLE_FILE=1 -sEXPORT_NAME=mitmjs
 
 CFLAGS += \
 	-flto -fno-exceptions \
@@ -27,8 +27,8 @@ CFLAGS += \
 
 .PHONY: format clean
 
-mitm.js: $(OBJS) $(mbedtls_o)
-	emcc -flto -Os $(LDFLAGS) -lembind -o $@ $^
+mitm.mjs: $(OBJS) $(mbedtls_o)
+	emcc -flto -Os $(LDFLAGS) -sEXPORT_ES6=1 -lembind -o $@ $^
 
 %.wasm.o: %.c
 	emcc -Os -c $(CFLAGS) -o $*.wasm.o $*.c

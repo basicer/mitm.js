@@ -48,7 +48,7 @@ jobs:
       if: github.event_name == 'push'
       with:
         name: wasm
-        path: mitm.js
+        path: mitm.mjs
         retention-days: 90
         overwrite: true
     - name: Nuke previous release
@@ -64,5 +64,5 @@ jobs:
         tag: latest
         commit: main
         body: Latest Build
-        artifacts: mitm.js
+        artifacts: mitm.mjs
         prerelease: true

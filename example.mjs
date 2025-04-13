@@ -1,4 +1,4 @@
-import makeMITM from  './mitm.js';
+import makeMITM from  './mitm.mjs';
 import net from 'node:net';
 import fs from 'node:fs';
 
